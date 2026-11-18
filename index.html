@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gillette Stadium · Game-Day Ops</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- ArcGIS Maps SDK for JavaScript 5.1 (CDN: core + components + Calcite) -->
+  <script type="module" src="https://js.arcgis.com/5.1/"></script>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="header.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body class="view-security">
+  <!-- boot / sign-in -->
+  <div id="boot" class="boot">
+    <div class="boot-card">
+      <div class="boot-brand"><span class="bb-a">GILLETTE STADIUM</span><span class="bb-b">GAME-DAY OPS</span></div>
+      <div class="boot-bar"><i></i></div>
+      <div id="bootMsg" class="boot-msg">Checking sign-in…</div>
+    </div>
+  </div>
+
+  <!-- scorebug header -->
+  <header id="scorebug" class="scorebug">
+    <button id="brandHome" class="sb-brand" title="Reset to the opening view (Home)">
+      <span class="sb-stripe"></span>
+      <span class="sb-name"><b>GILLETTE STADIUM</b><small>GAME-DAY OPS · FOXBOROUGH</small></span>
+    </button>
+    <nav id="tabs" class="sb-tabs">
+      <button data-v="security" class="on"><span class="k">1</span>SECURITY</button>
+      <button data-v="carts"><span class="k">2</span>VIP CARTS</button>
+      <button data-v="maint"><span class="k">3</span>MAINTENANCE</button>
+      <button data-v="ops"><span class="k">4</span>OPERATIONS</button>
+    </nav>
+    <div id="kpis" class="sb-kpis"></div>
+    <div class="sb-right">
+      <div class="seg dim-seg" id="dimSeg" title="2D map or 3D scene (D)"><button data-d="2d" class="on">2D</button><button data-d="3d">3D</button></div>
+      <div class="sb-clock"><span class="live-dot"></span><span>LIVE</span><b id="clock">--:--</b></div>
+      <div class="sb-user"><span id="userName"></span><button id="signOutBtn" class="sb-icon" title="Sign out"><calcite-icon icon="sign-out" scale="s"></calcite-icon></button>
+        <button id="hideHeaderBtn" class="sb-icon" title="Hide header (H)"><calcite-icon icon="chevrons-up" scale="s"></calcite-icon></button></div>
+    </div>
+  </header>
+  <button id="headerTab" class="header-tab" title="Show header (H)"><calcite-icon icon="chevrons-down" scale="s"></calcite-icon></button>
+
+  <!-- map -->
+  <main class="stage">
+    <arcgis-map id="map">
+      <arcgis-zoom slot="top-left"></arcgis-zoom>
+      <arcgis-expand slot="top-left" group="map-tools" mode="floating" expand-icon="layers">
+        <arcgis-layer-list show-heading show-filter filter-placeholder="Filter layers" visibility-appearance="checkbox"></arcgis-layer-list>
+      </arcgis-expand>
+      <arcgis-expand slot="top-left" group="map-tools" mode="floating" expand-icon="legend">
+        <arcgis-legend></arcgis-legend>
+      </arcgis-expand>
+      <arcgis-expand slot="top-left" group="map-tools" mode="floating" expand-icon="basemap">
+        <arcgis-basemap-gallery></arcgis-basemap-gallery>
+      </arcgis-expand>
+      <arcgis-floor-filter slot="top-left"></arcgis-floor-filter>
+    </arcgis-map>
+    <arcgis-scene id="scene" hidden>
+      <arcgis-zoom slot="top-left"></arcgis-zoom>
+      <arcgis-navigation-toggle slot="top-left"></arcgis-navigation-toggle>
+      <arcgis-compass slot="top-left"></arcgis-compass>
+      <arcgis-expand slot="top-left" group="scene-tools" mode="floating" expand-icon="layers">
+        <arcgis-layer-list show-heading show-filter filter-placeholder="Filter layers" visibility-appearance="checkbox"></arcgis-layer-list>
+      </arcgis-expand>
+      <arcgis-expand slot="top-left" group="scene-tools" mode="floating" expand-icon="legend">
+        <arcgis-legend></arcgis-legend>
+      </arcgis-expand>
+      <arcgis-expand slot="top-left" group="scene-tools" mode="floating" expand-icon="basemap">
+        <arcgis-basemap-gallery></arcgis-basemap-gallery>
+      </arcgis-expand>
+      <arcgis-floor-filter slot="top-left"></arcgis-floor-filter>
+    </arcgis-scene>
+    <div id="lowerThird" class="lower-third" hidden></div>
+  </main>
+
+  <!-- right board (slide-in) -->
+  <aside id="board" class="board">
+    <div class="board-h">
+      <div class="bh-slab"><small id="boardKicker">CAMERAS · POSTS · INCIDENTS</small><b id="boardTitle">SECURITY DESK</b></div>
+      <button id="boardRefresh" class="sb-icon" title="Refresh data"><calcite-icon icon="refresh" scale="s"></calcite-icon></button>
+      <button id="boardToggle" class="sb-icon" title="Collapse board ( ] )"><calcite-icon icon="chevrons-right" scale="s"></calcite-icon></button>
+    </div>
+    <div class="board-body">
+      <section data-v="carts" id="cartsBoard" hidden></section>
+      <section data-v="security" id="secBoard"></section>
+      <section data-v="maint" id="maintBoard" hidden></section>
+      <section data-v="ops" id="opsBoard" hidden></section>
+    </div>
+  </aside>
+  <button id="boardTab" class="board-tab" title="Open board ( ] )"><calcite-icon icon="chevrons-left" scale="s"></calcite-icon><span>BOARD</span></button>
+
+  <!-- ticker -->
+  <footer class="ticker">
+    <div class="tk-label">GAME-DAY WIRE</div>
+    <div class="tk-track"><div id="tickerRun" class="tk-run"></div></div>
+    <div class="tk-note">Synthetic demo data</div>
+  </footer>
+
+  <!-- camera viewer -->
+  <div id="camModal" class="cam-modal" hidden>
+    <div class="cam-shell">
+      <div class="cam-screen" id="camScreen">
+        <img id="camImg" alt="Camera view" />
+        <div class="cam-ovl tl"><b id="camId"></b><span id="camName"></span></div>
+        <div class="cam-ovl tr"><span class="rec">● REC</span><span id="camTime"></span></div>
+        <div class="cam-ovl bl" id="camWhere"></div>
+        <div class="cam-ovl br" id="camType"></div>
+        <div class="cam-fx" id="camFx"></div>
+      </div>
+      <div class="cam-side">
+        <div class="cam-side-h"><span id="camStatus"></span><button id="camClose" class="sb-icon" title="Close (Esc)"><calcite-icon icon="x" scale="s"></calcite-icon></button></div>
+        <dl id="camFacts" class="facts"></dl>
+        <div class="cam-btns">
+          <button id="camPrev" class="pbtn pb-neutral">◀ Prev</button>
+          <button id="camMap" class="pbtn pb-reassign">Show on map</button>
+          <button id="camNext" class="pbtn pb-neutral">Next ▶</button>
+        </div>
+        <p class="fineprint">Still rendered from the 3D Indoors model (geometry from the model, crowd synthetic). Not a live or recorded feed.</p>
+      </div>
+    </div>
+  </div>
+
+  <calcite-alert id="errAlert" kind="danger" icon="exclamation-mark-triangle" auto-close auto-close-duration="slow" placement="bottom-start">
+    <div slot="title">Something went wrong</div>
+    <div slot="message" id="errMsg"></div>
+  </calcite-alert>
+</body>
+</html>
